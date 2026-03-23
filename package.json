@@ -1,0 +1,35 @@
+{
+  "name": "vue3-cesium-threejs-node-server",
+  "version": "1.0.0",
+  "description": "智慧园区管理平台 - 企业级 Node.js 后台服务",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "dev:debug": "nodemon --inspect src/server.js",
+    "lint": "eslint src --ext .js"
+  },
+  "keywords": ["nodejs", "express", "jwt", "cesium", "threejs"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "compression": "^1.7.4",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "express-validator": "^7.0.1",
+    "express-rate-limit": "^7.1.5",
+    "dotenv": "^16.4.5",
+    "uuid": "^9.0.0",
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+# 自动检测文本文件并统一使用 LF
+* text=auto
+
+# 指定环境文件也使用 LF
+.env.development text eol=lf
+.env.production text eol=lf

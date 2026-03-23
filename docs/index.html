@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智慧园区管理平台 · 接口文档 v1.0</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #00d4ff;
+    --accent2: #00ff9d;
+    --warn: #ffaa00;
+    --danger: #ff5050;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --text-bright: #e6edf3;
+    --get: #3fb950;
+    --post: #58a6ff;
+    --put: #d2a8ff;
+    --delete: #f85149;
+    --patch: #ffa657;
+    --radius: 8px;
+    --code-bg: #010409;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── 侧边导航 ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo h1 {
+    font-size: 15px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .sidebar-logo p {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .nav-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    padding: 8px 20px 4px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.15s, color 0.15s;
+    border-radius: 0;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-bright); }
+  .nav-item.active { color: var(--accent); background: rgba(0,212,255,0.08); }
+  .method-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .m-get    { background: rgba(63,185,80,0.15);   color: var(--get); }
+  .m-post   { background: rgba(88,166,255,0.15);  color: var(--post); }
+  .m-put    { background: rgba(210,168,255,0.15); color: var(--put); }
+  .m-delete { background: rgba(248,81,73,0.15);   color: var(--delete); }
+
+  /* ── 主内容 ── */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 960px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .page-subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+  .badge-blue   { border-color: var(--accent);  color: var(--accent);  background: rgba(0,212,255,0.08); }
+  .badge-green  { border-color: var(--accent2); color: var(--accent2); background: rgba(0,255,157,0.08); }
+  .badge-yellow { border-color: var(--warn);    color: var(--warn);    background: rgba(255,170,0,0.08); }
+
+  /* ── 区块 ── */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-bright);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  /* ── 接口卡片 ── */
+  .api-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .api-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .api-card-header:hover { background: rgba(255,255,255,0.02); }
+  .method-tag {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    min-width: 56px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .method-tag.GET    { background: rgba(63,185,80,0.15);   color: var(--get);    border: 1px solid rgba(63,185,80,0.3); }
+  .method-tag.POST   { background: rgba(88,166,255,0.15);  color: var(--post);   border: 1px solid rgba(88,166,255,0.3); }
+  .method-tag.PUT    { background: rgba(210,168,255,0.15); color: var(--put);    border: 1px solid rgba(210,168,255,0.3); }
+  .method-tag.DELETE { background: rgba(248,81,73,0.15);   color: var(--delete); border: 1px solid rgba(248,81,73,0.3); }
+  .api-path {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 14px;
+    color: var(--text-bright);
+    font-weight: 600;
+  }
+  .api-desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-left: auto;
+  }
+  .auth-required {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(255,170,0,0.1);
+    color: var(--warn);
+    border: 1px solid rgba(255,170,0,0.3);
+    flex-shrink: 0;
+  }
+
+  .api-card-body {
+    padding: 20px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    margin-top: 16px;
+  }
+  .field-label:first-child { margin-top: 0; }
+
+  /* ── 参数表 ── */
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .param-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .param-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    vertical-align: top;
+  }
+  .param-table tr:last-child td { border-bottom: none; }
+  .param-name {
+    font-family: monospace;
+    color: var(--accent);
+    font-size: 13px;
+  }
+  .param-type {
+    font-family: monospace;
+    color: var(--accent2);
+    font-size: 12px;
+  }
+  .required-dot {
+    color: var(--danger);
+    margin-left: 2px;
+  }
+  .optional-tag {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  /* ── 代码块 ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+    color: #e6edf3;
+  }
+  .code-block .key   { color: #79c0ff; }
+  .code-block .str   { color: #a5d6ff; }
+  .code-block .num   { color: #ffa657; }
+  .code-block .bool  { color: #ff7b72; }
+  .code-block .null  { color: #8b949e; }
+  .code-block .comment { color: #8b949e; font-style: italic; }
+
+  /* ── 响应码说明 ── */
+  .status-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .status-table td { padding: 7px 12px; border-bottom: 1px solid rgba(48,54,61,0.5); }
+  .status-table tr:last-child td { border-bottom: none; }
+  .status-code {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .s200  { background: rgba(63,185,80,0.15);  color: var(--get); }
+  .s400  { background: rgba(255,170,0,0.15);  color: var(--warn); }
+  .s401  { background: rgba(248,81,73,0.15);  color: var(--danger); }
+  .s409  { background: rgba(210,168,255,0.15); color: var(--put); }
+  .s429  { background: rgba(255,166,87,0.15); color: var(--patch); }
+  .s500  { background: rgba(248,81,73,0.15);  color: var(--danger); }
+
+  /* ── 信息盒子 ── */
+  .info-box {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+  }
+  .info-box.blue   { background: rgba(0,212,255,0.06);  border-color: var(--accent);  color: #9ecfff; }
+  .info-box.yellow { background: rgba(255,170,0,0.06);  border-color: var(--warn);    color: #ffc870; }
+  .info-box.green  { background: rgba(0,255,157,0.06);  border-color: var(--accent2); color: #70ffb9; }
+
+  /* ── 目录 ── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .toc h3 { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .toc ul { list-style: none; }
+  .toc li { padding: 3px 0; }
+  .toc a  { color: var(--text); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .toc a:hover { color: var(--accent); }
+
+  /* ── 分隔线 ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── 通用响应结构 ── */
+  .response-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 16px; }
+    .response-wrap { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ 侧边导航 ═══════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>智慧园区 API</h1>
+    <p>v1.0.0 · Node.js + Express</p>
+  </div>
+
+  <div class="nav-group-title">概览</div>
+  <a href="#overview" class="nav-item active">📋 项目概述</a>
+  <a href="#base" class="nav-item">🔧 基础信息</a>
+  <a href="#response" class="nav-item">📦 响应格式</a>
+  <a href="#errors" class="nav-item">⚠️ 错误码说明</a>
+
+  <div class="nav-group-title" style="margin-top:12px">认证模块</div>
+  <a href="#login" class="nav-item">
+    <span class="method-badge m-post">POST</span>用户登录
+  </a>
+  <a href="#register" class="nav-item">
+    <span class="method-badge m-post">POST</span>用户注册
+  </a>
+  <a href="#userinfo" class="nav-item">
+    <span class="method-badge m-get">GET</span>用户信息
+  </a>
+  <a href="#refresh" class="nav-item">
+    <span class="method-badge m-post">POST</span>刷新 Token
+  </a>
+  <a href="#logout" class="nav-item">
+    <span class="method-badge m-post">POST</span>退出登录
+  </a>
+  <a href="#password" class="nav-item">
+    <span class="method-badge m-put">PUT</span>修改密码
+  </a>
+  <a href="#captcha" class="nav-item">
+    <span class="method-badge m-get">GET</span>获取验证码
+  </a>
+</nav>
+
+<!-- ═══════════════════ 主内容 ═══════════════════ -->
+<main class="main">
+
+  <h1 class="page-title">智慧园区管理平台 · 接口文档</h1>
+  <p class="page-subtitle">vue3-cesium-threejs-node-server — 企业级 Node.js 后台服务</p>
+  <div class="badge-row">
+    <span class="badge badge-blue">v1.0.0</span>
+    <span class="badge badge-green">Node.js ≥ 18</span>
+    <span class="badge badge-green">Express 4.x</span>
+    <span class="badge badge-yellow">JWT Bearer Auth</span>
+    <span class="badge badge-blue">SQLite</span>
+  </div>
+
+  <!-- ── 概述 ── -->
+  <section class="section" id="overview">
+    <h2 class="section-title">📋 项目概述</h2>
+    <p style="color:var(--text-dim);margin-bottom:16px;">
+      本服务为智慧园区管理平台提供 RESTful 后端 API，基于 <strong style="color:var(--text-bright)">Express 4.x + SQLite + JWT</strong> 构建，
+      具备企业级的安全防护（CORS、Helmet、限流）、统一响应格式和优雅关闭机制。
+    </p>
+    <div class="toc">
+      <h3>当前已实现接口</h3>
+      <ul>
+        <li><a href="#login"><span class="method-badge m-post">POST</span>&nbsp;/auth/login — 用户登录</a></li>
+        <li><a href="#register"><span class="method-badge m-post">POST</span>&nbsp;/auth/register — 用户注册</a></li>
+        <li><a href="#userinfo"><span class="method-badge m-get">GET</span>&nbsp;/auth/userinfo — 获取当前用户信息 🔒</a></li>
+        <li><a href="#refresh"><span class="method-badge m-post">POST</span>&nbsp;/auth/refresh — 刷新 Access Token</a></li>
+        <li><a href="#logout"><span class="method-badge m-post">POST</span>&nbsp;/auth/logout — 退出登录 🔒</a></li>
+        <li><a href="#password"><span class="method-badge m-put">PUT</span>&nbsp;/auth/password — 修改密码 🔒</a></li>
+        <li><a href="#captcha"><span class="method-badge m-get">GET</span>&nbsp;/auth/captcha — 获取图片验证码</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── 基础信息 ── -->
+  <section class="section" id="base">
+    <h2 class="section-title">🔧 基础信息</h2>
+    <table class="param-table">
+      <tr><td style="width:160px;color:var(--text-dim)">开发环境地址</td><td><code class="param-name">http://localhost:3000</code></td></tr>
+      <tr><td style="color:var(--text-dim)">接口前缀</td><td>无（前端 vite proxy 把 <code>/api/*</code> 映射到 <code>http://localhost:3000/*</code>）</td></tr>
+      <tr><td style="color:var(--text-dim)">Content-Type</td><td><code>application/json; charset=utf-8</code></td></tr>
+      <tr><td style="color:var(--text-dim)">鉴权方式</td><td>请求头 <code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+      <tr><td style="color:var(--text-dim)">Token 有效期</td><td>7 天（access token）/ 30 天（refresh token）</td></tr>
+      <tr><td style="color:var(--text-dim)">全局限流</td><td>每 IP 每 15 分钟 200 次；登录接口每 IP 每 15 分钟 20 次</td></tr>
+      <tr><td style="color:var(--text-dim)">健康检查</td><td><code>GET /health</code></td></tr>
+    </table>
+  </section>
+
+  <!-- ── 统一响应格式 ── -->
+  <section class="section" id="response">
+    <h2 class="section-title">📦 统一响应格式</h2>
+    <p style="color:var(--text-dim);margin-bottom:12px;">所有接口均返回相同的 JSON 包装结构，与前端 <code>ApiResponse&lt;T&gt;</code> 类型完全对齐。</p>
+    <div class="response-wrap">
+      <div>
+        <div class="field-label">成功响应示例</div>
+        <div class="code-block">{
+  <span class="key">"code"</span>:      <span class="num">0</span>,
+  <span class="key">"success"</span>:   <span class="bool">true</span>,
+  <span class="key">"data"</span>:      { ... },
+  <span class="key">"message"</span>:   <span class="str">"success"</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1711123456789</span>
+}</div>
+      </div>
+      <div>
+        <div class="field-label">失败响应示例</div>
+        <div class="code-block">{
+  <span class="key">"code"</span>:      <span class="num">401</span>,
+  <span class="key">"success"</span>:   <span class="bool">false</span>,
+  <span class="key">"data"</span>:      <span class="null">null</span>,
+  <span class="key">"message"</span>:   <span class="str">"用户名或密码错误"</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1711123456789</span>
+}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 错误码 ── -->
+  <section class="section" id="errors">
+    <h2 class="section-title">⚠️ 错误码说明</h2>
+    <table class="status-table">
+      <thead>
+        <tr style="background:rgba(255,255,255,0.03)">
+          <td style="color:var(--text-dim);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:8px 12px">HTTP 状态码</td>
+          <td style="color:var(--text-dim);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:8px 12px">业务 code</td>
+          <td style="color:var(--text-dim);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:8px 12px">含义</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="status-code s200">200</span></td><td><code>0</code></td><td>请求成功</td></tr>
+        <tr><td><span class="status-code s400">400</span></td><td><code>400</code></td><td>请求参数错误（字段缺失或格式不合规）</td></tr>
+        <tr><td><span class="status-code s401">401</span></td><td><code>401</code></td><td>未授权：Token 缺失、无效或已过期；用户名或密码错误</td></tr>
+        <tr><td><span class="status-code s401">403</span></td><td><code>403</code></td><td>账号已被禁用或无访问权限</td></tr>
+        <tr><td><span class="status-code s401">404</span></td><td><code>404</code></td><td>资源不存在</td></tr>
+        <tr><td><span class="status-code s409">409</span></td><td><code>409</code></td><td>资源冲突（用户名/邮箱已被注册）</td></tr>
+        <tr><td><span class="status-code s429">429</span></td><td><code>429</code></td><td>请求过于频繁，触发限流</td></tr>
+        <tr><td><span class="status-code s500">500</span></td><td><code>500</code></td><td>服务器内部错误</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr />
+
+  <!-- ════════════════════════════════════════════════
+       认证模块
+  ════════════════════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">🔑 认证模块（/auth）</h2>
+
+    <!-- ── 登录 ── -->
+    <div class="api-card" id="login">
+      <div class="api-card-header">
+        <span class="method-tag POST">POST</span>
+        <span class="api-path">/auth/login</span>
+        <span class="api-desc">用户登录</span>
+      </div>
+      <div class="api-card-body">
+        <div class="info-box blue">登录成功后，将 <strong>token</strong> 存入 localStorage，后续请求在 Header 中携带 <code>Authorization: Bearer &lt;token&gt;</code>。</div>
+        <div class="info-box yellow">⚡ 限流：每 IP 每 15 分钟最多 20 次登录请求。</div>
+
+        <div class="field-label">Request Body（application/json）</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>校验规则</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="param-name">username</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空</td>
+              <td>用户名</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">password</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空，长度 ≥ 6</td>
+              <td>密码（明文，HTTPS 传输）</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">captcha</span><span class="optional-tag">可选</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td>图片验证码（配合 /auth/captcha 使用）</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Request 示例</div>
+        <div class="code-block">{
+  <span class="key">"username"</span>: <span class="str">"admin"</span>,
+  <span class="key">"password"</span>: <span class="str">"admin123"</span>
+}</div>
+
+        <div class="field-label" style="margin-top:20px">Response Data（登录成功，code=0）</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="param-name">token</span></td><td><span class="param-type">string</span></td><td>Access Token，有效期 7 天</td></tr>
+            <tr><td><span class="param-name">refreshToken</span></td><td><span class="param-type">string</span></td><td>Refresh Token，有效期 30 天</td></tr>
+            <tr><td><span class="param-name">expires</span></td><td><span class="param-type">number</span></td><td>Access Token 过期时间戳（毫秒）</td></tr>
+            <tr><td><span class="param-name">userInfo</span></td><td><span class="param-type">UserInfo</span></td><td>见下方 UserInfo 数据结构</td></tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Response 示例</div>
+        <div class="code-block">{
+  <span class="key">"code"</span>: <span class="num">0</span>,
+  <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"message"</span>: <span class="str">"登录成功"</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"token"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>,
+    <span class="key">"refreshToken"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>,
+    <span class="key">"expires"</span>: <span class="num">1712467200000</span>,
+    <span class="key">"userInfo"</span>: {
+      <span class="key">"id"</span>: <span class="str">"a1b2c3d4-..."</span>,
+      <span class="key">"username"</span>: <span class="str">"admin"</span>,
+      <span class="key">"nickname"</span>: <span class="str">"管理员"</span>,
+      <span class="key">"email"</span>: <span class="null">null</span>,
+      <span class="key">"phone"</span>: <span class="null">null</span>,
+      <span class="key">"avatar"</span>: <span class="null">null</span>,
+      <span class="key">"roles"</span>: [<span class="str">"admin"</span>, <span class="str">"user"</span>],
+      <span class="key">"permissions"</span>: [<span class="str">"*"</span>],
+      <span class="key">"createTime"</span>: <span class="str">"2026-03-23T09:00:00.000Z"</span>
+    }
+  },
+  <span class="key">"timestamp"</span>: <span class="num">1711123456789</span>
+}</div>
+
+        <div class="field-label" style="margin-top:20px">可能的错误</div>
+        <table class="status-table">
+          <tr><td><span class="status-code s401">401</span></td><td>用户名或密码错误</td></tr>
+          <tr><td><span class="status-code s401">403</span></td><td>账号已被禁用</td></tr>
+          <tr><td><span class="status-code s400">400</span></td><td>参数校验失败（用户名/密码为空或密码过短）</td></tr>
+          <tr><td><span class="status-code s429">429</span></td><td>登录过于频繁，触发限流</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 注册 ── -->
+    <div class="api-card" id="register">
+      <div class="api-card-header">
+        <span class="method-tag POST">POST</span>
+        <span class="api-path">/auth/register</span>
+        <span class="api-desc">用户注册</span>
+      </div>
+      <div class="api-card-body">
+        <div class="info-box green">注册成功后自动跳转登录页，无需服务端自动登录。</div>
+
+        <div class="field-label">Request Body（application/json）</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>校验规则</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="param-name">username</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空，正则 /^[A-Za-z0-9_]{4,20}$/</td>
+              <td>用户名（4-20 位字母、数字或下划线）</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">password</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空，长度 ≥ 8</td>
+              <td>密码（建议包含大写字母、数字、特殊字符）</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">confirmPassword</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空，必须与 password 一致</td>
+              <td>确认密码</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">email</span><span class="optional-tag">可选</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>—</td>
+              <td>若填写，需符合邮箱格式且全局唯一</td>
+              <td>邮箱地址</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">phone</span><span class="optional-tag">可选</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>—</td>
+              <td>若填写，需符合中国手机号格式</td>
+              <td>手机号</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">captcha</span><span class="optional-tag">可选</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td>图片验证码</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Request 示例</div>
+        <div class="code-block">{
+  <span class="key">"username"</span>:        <span class="str">"testUser01"</span>,
+  <span class="key">"password"</span>:        <span class="str">"MyPass@2026"</span>,
+  <span class="key">"confirmPassword"</span>: <span class="str">"MyPass@2026"</span>,
+  <span class="key">"email"</span>:           <span class="str">"test@example.com"</span>
+}</div>
+
+        <div class="field-label" style="margin-top:20px">Response Data（注册成功，code=0）</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="param-name">userId</span></td><td><span class="param-type">string</span></td><td>新用户 ID（UUID）</td></tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Response 示例</div>
+        <div class="code-block">{
+  <span class="key">"code"</span>: <span class="num">0</span>,
+  <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"message"</span>: <span class="str">"注册成功"</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"userId"</span>: <span class="str">"b2c3d4e5-1234-5678-abcd-ef0123456789"</span>
+  },
+  <span class="key">"timestamp"</span>: <span class="num">1711123456789</span>
+}</div>
+
+        <div class="field-label" style="margin-top:20px">可能的错误</div>
+        <table class="status-table">
+          <tr><td><span class="status-code s400">400</span></td><td>参数校验失败（字段格式不合规、两次密码不一致）</td></tr>
+          <tr><td><span class="status-code s409">409</span></td><td>用户名已被占用 / 该邮箱已被注册</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 用户信息 ── -->
+    <div class="api-card" id="userinfo">
+      <div class="api-card-header">
+        <span class="method-tag GET">GET</span>
+        <span class="api-path">/auth/userinfo</span>
+        <span class="api-desc">获取当前用户信息</span>
+        <span class="auth-required">🔒 需要登录</span>
+      </div>
+      <div class="api-card-body">
+        <div class="info-box yellow">需在请求头携带 <code>Authorization: Bearer &lt;token&gt;</code>，否则返回 401。</div>
+
+        <div class="field-label">Request Headers</div>
+        <table class="param-table">
+          <tr><td><span class="param-name">Authorization</span></td><td><span class="param-type">string</span></td><td>Bearer &lt;access_token&gt;</td></tr>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Response Data（UserInfo 结构）</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>必有</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="param-name">id</span></td><td><span class="param-type">string</span></td><td>✓</td><td>用户 ID（UUID）</td></tr>
+            <tr><td><span class="param-name">username</span></td><td><span class="param-type">string</span></td><td>✓</td><td>用户名</td></tr>
+            <tr><td><span class="param-name">nickname</span></td><td><span class="param-type">string|null</span></td><td>—</td><td>昵称</td></tr>
+            <tr><td><span class="param-name">email</span></td><td><span class="param-type">string|null</span></td><td>—</td><td>邮箱</td></tr>
+            <tr><td><span class="param-name">phone</span></td><td><span class="param-type">string|null</span></td><td>—</td><td>手机号</td></tr>
+            <tr><td><span class="param-name">avatar</span></td><td><span class="param-type">string|null</span></td><td>—</td><td>头像 URL</td></tr>
+            <tr><td><span class="param-name">roles</span></td><td><span class="param-type">string[]</span></td><td>✓</td><td>角色列表，如 ["admin","user"]</td></tr>
+            <tr><td><span class="param-name">permissions</span></td><td><span class="param-type">string[]</span></td><td>✓</td><td>权限列表，如 ["*"] 或 ["dashboard:read"]</td></tr>
+            <tr><td><span class="param-name">createTime</span></td><td><span class="param-type">string</span></td><td>—</td><td>创建时间（ISO 8601）</td></tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Response 示例</div>
+        <div class="code-block">{
+  <span class="key">"code"</span>: <span class="num">0</span>,
+  <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"id"</span>: <span class="str">"a1b2c3d4-..."</span>,
+    <span class="key">"username"</span>: <span class="str">"admin"</span>,
+    <span class="key">"nickname"</span>: <span class="str">"管理员"</span>,
+    <span class="key">"email"</span>: <span class="null">null</span>,
+    <span class="key">"phone"</span>: <span class="null">null</span>,
+    <span class="key">"avatar"</span>: <span class="null">null</span>,
+    <span class="key">"roles"</span>: [<span class="str">"admin"</span>, <span class="str">"user"</span>],
+    <span class="key">"permissions"</span>: [<span class="str">"*"</span>],
+    <span class="key">"createTime"</span>: <span class="str">"2026-03-23T09:00:00.000Z"</span>
+  },
+  <span class="key">"message"</span>: <span class="str">"success"</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1711123456789</span>
+}</div>
+      </div>
+    </div>
+
+    <!-- ── 刷新 Token ── -->
+    <div class="api-card" id="refresh">
+      <div class="api-card-header">
+        <span class="method-tag POST">POST</span>
+        <span class="api-path">/auth/refresh</span>
+        <span class="api-desc">刷新 Access Token</span>
+      </div>
+      <div class="api-card-body">
+        <div class="info-box blue">当 access token 过期（收到 401）后，用 refresh token 换取新的 access token，无需重新登录。</div>
+
+        <div class="field-label">Request Body</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="param-name">refreshToken</span></td><td><span class="param-type">string</span></td><td><span style="color:var(--danger)">必填</span></td><td>登录时获取的 Refresh Token</td></tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Response Data</div>
+        <p style="color:var(--text-dim);font-size:13px">同登录接口 Response Data（token、refreshToken、expires、userInfo）</p>
+
+        <div class="field-label" style="margin-top:20px">可能的错误</div>
+        <table class="status-table">
+          <tr><td><span class="status-code s401">401</span></td><td>refreshToken 无效或已过期，请重新登录</td></tr>
+          <tr><td><span class="status-code s401">403</span></td><td>账号已被禁用</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 退出登录 ── -->
+    <div class="api-card" id="logout">
+      <div class="api-card-header">
+        <span class="method-tag POST">POST</span>
+        <span class="api-path">/auth/logout</span>
+        <span class="api-desc">退出登录</span>
+        <span class="auth-required">🔒 需要登录</span>
+      </div>
+      <div class="api-card-body">
+        <div class="info-box blue">无状态 JWT 模式下，服务端直接返回成功，前端负责清除本地 token 和用户状态。</div>
+
+        <div class="field-label">Request Headers</div>
+        <table class="param-table">
+          <tr><td><span class="param-name">Authorization</span></td><td><span class="param-type">string</span></td><td>Bearer &lt;access_token&gt;</td></tr>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Response 示例</div>
+        <div class="code-block">{
+  <span class="key">"code"</span>: <span class="num">0</span>,
+  <span class="key">"success"</span>: <span class="bool">true</span>,
+  <span class="key">"data"</span>: <span class="null">null</span>,
+  <span class="key">"message"</span>: <span class="str">"已退出登录"</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1711123456789</span>
+}</div>
+      </div>
+    </div>
+
+    <!-- ── 修改密码 ── -->
+    <div class="api-card" id="password">
+      <div class="api-card-header">
+        <span class="method-tag PUT">PUT</span>
+        <span class="api-path">/auth/password</span>
+        <span class="api-desc">修改密码</span>
+        <span class="auth-required">🔒 需要登录</span>
+      </div>
+      <div class="api-card-body">
+        <div class="field-label">Request Headers</div>
+        <table class="param-table">
+          <tr><td><span class="param-name">Authorization</span></td><td><span class="param-type">string</span></td><td>Bearer &lt;access_token&gt;</td></tr>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">Request Body</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>校验规则</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="param-name">oldPassword</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空</td>
+              <td>当前密码</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">newPassword</span></td>
+              <td><span class="param-type">string</span></td>
+              <td><span style="color:var(--danger)">必填</span></td>
+              <td>非空，长度 ≥ 6</td>
+              <td>新密码</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="field-label" style="margin-top:20px">可能的错误</div>
+        <table class="status-table">
+          <tr><td><span class="status-code s400">400</span></td><td>原密码错误 / 新密码格式不合规</td></tr>
+          <tr><td><span class="status-code s401">401</span></td><td>未登录或 Token 已过期</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 验证码 ── -->
+    <div class="api-card" id="captcha">
+      <div class="api-card-header">
+        <span class="method-tag GET">GET</span>
+        <span class="api-path">/auth/captcha</span>
+        <span class="api-desc">获取图片验证码</span>
+      </div>
+      <div class="api-card-body">
+        <div class="info-box blue">当前为占位实现，后续可集成 <code>svg-captcha</code> + Redis 缓存。</div>
+
+        <div class="field-label">Response Data</div>
+        <table class="param-table">
+          <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="param-name">captchaKey</span></td><td><span class="param-type">string</span></td><td>验证码唯一 Key，提交登录/注册时一并传入</td></tr>
+            <tr><td><span class="param-name">captchaImg</span></td><td><span class="param-type">string</span></td><td>Base64 编码的 SVG 图片，直接赋值给 &lt;img src&gt;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <hr />
+
+  <!-- ── 数据结构参考 ── -->
+  <section class="section">
+    <h2 class="section-title">📐 数据结构参考</h2>
+    <div class="field-label">UserInfo（与前端 types/auth.ts 完全对齐）</div>
+    <div class="code-block"><span class="comment">// TypeScript 类型参考（src/types/auth.ts）</span>
+interface UserInfo {
+  id          : <span class="param-type">string</span>         <span class="comment">// 用户 ID</span>
+  username    : <span class="param-type">string</span>         <span class="comment">// 用户名</span>
+  nickname    ?: <span class="param-type">string</span>        <span class="comment">// 昵称</span>
+  email       ?: <span class="param-type">string</span>        <span class="comment">// 邮箱</span>
+  phone       ?: <span class="param-type">string</span>        <span class="comment">// 手机号</span>
+  avatar      ?: <span class="param-type">string</span>        <span class="comment">// 头像 URL</span>
+  roles       : <span class="param-type">string[]</span>       <span class="comment">// 角色列表</span>
+  permissions : <span class="param-type">string[]</span>       <span class="comment">// 权限列表</span>
+  createTime  ?: <span class="param-type">string</span>        <span class="comment">// 创建时间（ISO 8601）</span>
+}
+
+interface LoginResult {
+  token        : <span class="param-type">string</span>        <span class="comment">// Access Token</span>
+  refreshToken ?: <span class="param-type">string</span>       <span class="comment">// Refresh Token</span>
+  expires      ?: <span class="param-type">number</span>       <span class="comment">// 过期时间戳（毫秒）</span>
+  userInfo     : <span class="param-type">UserInfo</span>      <span class="comment">// 用户信息</span>
+}</div>
+  </section>
+
+  <!-- ── 项目结构 ── -->
+  <section class="section">
+    <h2 class="section-title">🗂️ 项目目录结构</h2>
+    <div class="code-block">vue3-cesium-threejs-node-server/
+├── src/
+│   ├── server.js              <span class="comment"># 启动入口（HTTP Server + 优雅关闭）</span>
+│   ├── app.js                 <span class="comment"># Express 应用（中间件 + 路由挂载）</span>
+│   ├── config/
+│   │   └── index.js           <span class="comment"># 全局配置（读取 .env）</span>
+│   ├── db/
+│   │   └── index.js           <span class="comment"># SQLite 初始化 + 建表 + 种子数据</span>
+│   ├── models/
+│   │   └── userModel.js       <span class="comment"># 用户数据访问层</span>
+│   ├── controllers/
+│   │   └── authController.js  <span class="comment"># 认证业务逻辑</span>
+│   ├── routes/
+│   │   └── auth.js            <span class="comment"># 认证路由</span>
+│   ├── middlewares/
+│   │   ├── authenticate.js    <span class="comment"># JWT 鉴权中间件</span>
+│   │   ├── validate.js        <span class="comment"># 校验结果提取中间件</span>
+│   │   ├── rateLimiter.js     <span class="comment"># 限流中间件</span>
+│   │   ├── respond.js         <span class="comment"># res.success/res.fail 挂载</span>
+│   │   ├── errorHandler.js    <span class="comment"># 全局错误处理</span>
+│   │   └── notFound.js        <span class="comment"># 404 处理</span>
+│   ├── validators/
+│   │   └── authValidator.js   <span class="comment"># express-validator 校验规则</span>
+│   └── utils/
+│       ├── AppError.js        <span class="comment"># 自定义业务错误类</span>
+│       ├── jwt.js             <span class="comment"># JWT 工具</span>
+│       ├── logger.js          <span class="comment"># 日志工具</span>
+│       └── response.js        <span class="comment"># 统一响应构造函数</span>
+├── docs/
+│   └── index.html             <span class="comment"># 接口文档（本文件）</span>
+├── data/                      <span class="comment"># SQLite 数据库文件（自动创建）</span>
+├── .env                       <span class="comment"># 环境变量（不提交 git）</span>
+├── .env.example               <span class="comment"># 环境变量模板</span>
+└── package.json</div>
+  </section>
+
+  <!-- ── 快速启动 ── -->
+  <section class="section">
+    <h2 class="section-title">🚀 快速启动</h2>
+    <div class="code-block"><span class="comment"># 1. 进入目录</span>
+cd vue3-cesium-threejs-node-server
+
+<span class="comment"># 2. 安装依赖</span>
+npm install
+
+<span class="comment"># 3. 启动开发服务（自动重载）</span>
+npm run dev
+
+<span class="comment"># 4. 访问接口文档</span>
+<span class="str">http://localhost:3000/api-docs</span>
+
+<span class="comment"># 5. 健康检查</span>
+<span class="str">http://localhost:3000/health</span>
+
+<span class="comment"># ── 默认账号 ──</span>
+<span class="comment"># 用户名: admin</span>
+<span class="comment"># 密  码: admin123</span></div>
+  </section>
+
+  <div style="text-align:center;color:var(--text-dim);font-size:12px;padding:32px 0 16px;">
+    智慧园区管理平台 API 文档 · v1.0.0 · 2026
+  </div>
+
+</main>
+
+<script>
+  // 高亮当前导航项
+  const navItems = document.querySelectorAll('.nav-item')
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id
+        navItems.forEach(n => {
+          n.classList.toggle('active', n.getAttribute('href') === '#' + id)
+        })
+      }
+    })
+  }, { rootMargin: '-20% 0px -70% 0px' })
+
+  document.querySelectorAll('section[id], div[id]').forEach(el => observer.observe(el))
+</script>
+</body>
+</html>
