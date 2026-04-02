@@ -39,32 +39,32 @@ function rowToUser(row) {
 /**
  * 查询原始行（含 password），仅登录鉴权内部使用
  */
-function findRawByUsername(username) {
-  return db.findOne(COLL, { username }) || null
+async function findRawByUsername(username) {
+  return (await db.findOne(COLL, { username })) || null
 }
 
 /**
  * 根据 ID 查询（不含密码）
  */
-function findById(id) {
-  const row = db.findOne(COLL, { id })
+async function findById(id) {
+  const row = await db.findOne(COLL, { id })
   return rowToUser(row)
 }
 
 /**
  * 根据用户名查询（不含密码）
  */
-function findByUsername(username) {
-  const row = db.findOne(COLL, { username })
+async function findByUsername(username) {
+  const row = await db.findOne(COLL, { username })
   return rowToUser(row)
 }
 
 /**
  * 根据邮箱查询（不含密码）
  */
-function findByEmail(email) {
+async function findByEmail(email) {
   if (!email) return null
-  const row = db.findOne(COLL, { email })
+  const row = await db.findOne(COLL, { email })
   return rowToUser(row)
 }
 
@@ -73,7 +73,7 @@ function findByEmail(email) {
  * @param {object} data - { username, passwordHash, email?, phone?, nickname? }
  * @returns {object} 新用户（不含密码）
  */
-function create(data) {
+async function create(data) {
   const now = dayjs().toISOString()
   const id  = uuidv4()
   const doc = {
@@ -90,39 +90,39 @@ function create(data) {
     create_time: now,
     update_time: now
   }
-  db.insert(COLL, doc)
+  await db.insert(COLL, doc)
   return findById(id)
 }
 
 /**
  * 更新用户信息（不含密码）
  */
-function updateById(id, fields) {
+async function updateById(id, fields) {
   const now = dayjs().toISOString()
   const allowed = ['nickname', 'email', 'phone', 'avatar', 'status']
   const updates = { update_time: now }
   for (const key of allowed) {
     if (fields[key] !== undefined) updates[key] = fields[key]
   }
-  db.updateOne(COLL, { id }, updates)
+  await db.updateOne(COLL, { id }, updates)
   return findById(id)
 }
 
 /**
  * 更新密码
  */
-function updatePassword(id, newPasswordHash) {
+async function updatePassword(id, newPasswordHash) {
   const now = dayjs().toISOString()
-  db.updateOne(COLL, { id }, { password: newPasswordHash, update_time: now })
+  await db.updateOne(COLL, { id }, { password: newPasswordHash, update_time: now })
 }
 
 /**
  * 写入登录日志
  */
-function addLoginLog(userId, ip, userAgent, status = 'success') {
+async function addLoginLog(userId, ip, userAgent, status = 'success') {
   try {
     const now = dayjs().toISOString()
-    db.insert(LOG_COLL, {
+    await db.insert(LOG_COLL, {
       id        : Date.now() + Math.random(),
       user_id   : userId,
       ip        : ip || '',

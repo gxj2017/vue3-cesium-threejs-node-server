@@ -54,9 +54,9 @@ async function login(req, res, next) {
     const userAgent = req.headers['user-agent']
 
     // 1. 查用户（含密码字段）
-    const raw = userModel.findRawByUsername(username)
+    const raw = await userModel.findRawByUsername(username)
     if (!raw) {
-      userModel.addLoginLog('unknown', ip, userAgent, 'fail:not_found')
+      await userModel.addLoginLog('unknown', ip, userAgent, 'fail:not_found')
       throw new AppError('用户名或密码错误', 401)
     }
 
@@ -68,7 +68,7 @@ async function login(req, res, next) {
     // 3. 密码校验
     const match = await bcrypt.compare(password, raw.password)
     if (!match) {
-      userModel.addLoginLog(raw.id, ip, userAgent, 'fail:wrong_password')
+      await userModel.addLoginLog(raw.id, ip, userAgent, 'fail:wrong_password')
       throw new AppError('用户名或密码错误', 401)
     }
 
@@ -79,10 +79,10 @@ async function login(req, res, next) {
     const refreshToken = jwtUtil.signRefreshToken(payload)
 
     // 5. 记录登录日志
-    userModel.addLoginLog(raw.id, ip, userAgent, 'success')
+    await userModel.addLoginLog(raw.id, ip, userAgent, 'success')
 
     // 6. 构造响应（对齐前端 LoginResult）
-    const user = userModel.findById(raw.id)
+    const user = await userModel.findById(raw.id)
     res.success({
       token,
       refreshToken,
@@ -110,14 +110,14 @@ async function register(req, res, next) {
     }
 
     // 2. 用户名唯一性
-    const existUser = userModel.findByUsername(username)
+    const existUser = await userModel.findByUsername(username)
     if (existUser) {
       throw new AppError('用户名已被占用', 409)
     }
 
     // 3. 邮箱唯一性
     if (email) {
-      const existEmail = userModel.findByEmail(email)
+      const existEmail = await userModel.findByEmail(email)
       if (existEmail) {
         throw new AppError('该邮箱已被注册', 409)
       }
@@ -127,7 +127,7 @@ async function register(req, res, next) {
     const passwordHash = await bcrypt.hash(password, config.BCRYPT_ROUNDS)
 
     // 5. 创建用户
-    const newUser = userModel.create({ username, passwordHash, email, phone })
+    const newUser = await userModel.create({ username, passwordHash, email, phone })
 
     res.success({ userId: newUser.id }, '注册成功')
 
@@ -143,7 +143,7 @@ async function register(req, res, next) {
  */
 async function getUserInfo(req, res, next) {
   try {
-    const user = userModel.findById(req.user.id)
+    const user = await userModel.findById(req.user.id)
     if (!user) throw new AppError('用户不存在', 404)
     res.success(formatUserInfo(user))
   } catch (err) {
@@ -168,7 +168,7 @@ async function refreshToken(req, res, next) {
       throw new AppError('refreshToken 无效或已过期，请重新登录', 401)
     }
 
-    const user = userModel.findById(decoded.id)
+    const user = await userModel.findById(decoded.id)
     if (!user) throw new AppError('用户不存在', 404)
     if (user.status !== 1) throw new AppError('账号已被禁用', 403)
 
@@ -214,7 +214,7 @@ async function changePassword(req, res, next) {
     const userId = req.user.id
 
     // 查含密码的原始记录
-    const raw = userModel.findRawByUsername(req.user.username)
+    const raw = await userModel.findRawByUsername(req.user.username)
     if (!raw) throw new AppError('用户不存在', 404)
 
     const match = await bcrypt.compare(oldPassword, raw.password)
@@ -223,7 +223,7 @@ async function changePassword(req, res, next) {
     if (newPassword.length < 6) throw new AppError('新密码不能少于 6 位', 400)
 
     const newHash = await bcrypt.hash(newPassword, config.BCRYPT_ROUNDS)
-    userModel.updatePassword(userId, newHash)
+    await userModel.updatePassword(userId, newHash)
 
     res.success(null, '密码修改成功')
   } catch (err) {

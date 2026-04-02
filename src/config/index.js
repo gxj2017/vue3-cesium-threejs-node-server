@@ -15,7 +15,10 @@ module.exports = {
   JWT_REFRESH_SECRET  : process.env.JWT_REFRESH_SECRET   || 'default-dev-refresh-secret',
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
 
-  // 数据库（JSON 文件路径，.sqlite 后缀会自动转成 .json）
+  // 数据库：全项目统一 MongoDB
+  MONGODB_URI    : process.env.MONGODB_URI     || 'mongodb://127.0.0.1:27017',
+  MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'vue3_cesium_app',
+  /** 可选：旧版 database.json 路径，用于首次导入管理员或 npm run db:import-admin */
   DB_PATH: process.env.DB_PATH || './data/database.json',
 
   // 加密
